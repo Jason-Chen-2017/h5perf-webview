@@ -24,6 +24,8 @@ public class H5TestActivity extends AppCompatActivity {
     }
 
     public void doH5Test() {
+        tcpdump();
+
         webView = (WebView) findViewById(R.id.h5WebView);
         //启用支持javascript
         WebSettings settings = webView.getSettings();
@@ -112,7 +114,23 @@ public class H5TestActivity extends AppCompatActivity {
      * tcpdump抓取请求数据包
      */
 
-    private void tcpdump(){
+    private void tcpdump() {
+
+        Thread tcpdump = new Thread() {
+            @Override
+            public void run() {
+                super.run();
+                String[] cmds = {
+                        "tcpdump -p -s 0 -w /sdcard/h5test.pcap"
+                };
+
+                Log.i("TAGH5", "执行Shell 。。。");
+                ShellUtil.CommandResult result = ShellUtil.execCommand(cmds, true, true);
+                Log.i("TAGH5", "CommandResult：" + result);
+            }
+        };
+
+        tcpdump.start();
 
     }
 
@@ -120,7 +138,7 @@ public class H5TestActivity extends AppCompatActivity {
      * 记录性能数据，写入web的数据库中
      */
 
-    private void recordPerfDate(String url, PerfData data){
+    private void recordPerfDate(String url, PerfData data) {
 
     }
 

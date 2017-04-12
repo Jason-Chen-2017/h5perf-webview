@@ -31,33 +31,33 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    //创建服务端Socket
-                    ServerSocket serverSocket = new ServerSocket(8888);
-                    Socket socket;
-                    int read;
-                    String content;
-
-                    while ((socket = serverSocket.accept()) != null) {//当有客户端连接时进入
-                        InputStream is = socket.getInputStream();
-                        OutputStream os = socket.getOutputStream();
-                        content = "";
-                        while ((read = is.read()) != -1) {
-                            System.out.print((char) read);
-                            content += (char) read;
-                        }
-                        os.write("ok".getBytes());
-                        os.close();
-                        is.close();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    //创建服务端Socket
+//                    ServerSocket serverSocket = new ServerSocket(8888);
+//                    Socket socket;
+//                    int read;
+//                    String content;
+//
+//                    while ((socket = serverSocket.accept()) != null) {//当有客户端连接时进入
+//                        InputStream is = socket.getInputStream();
+//                        OutputStream os = socket.getOutputStream();
+//                        content = "";
+//                        while ((read = is.read()) != -1) {
+//                            System.out.print((char) read);
+//                            content += (char) read;
+//                        }
+//                        os.write("ok".getBytes());
+//                        os.close();
+//                        is.close();
+//                    }
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        });
 
     }
 
