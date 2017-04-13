@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
      */
     public void runTest(String testUrl) {
         Intent intent = new Intent(MainActivity.this, H5TestActivity.class);
-        intent.putExtra("testUrl", testUrl);
+        intent.putExtra("url", testUrl);
         startActivity(intent);
     }
 }

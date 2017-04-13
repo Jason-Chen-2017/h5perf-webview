@@ -3,6 +3,7 @@ package com.example.jack.myapplication2;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 /**
  * Created by jack on 2017/4/13.
@@ -15,15 +16,12 @@ import android.content.Intent;
 
 public class ServiceBroadcastReceiver extends BroadcastReceiver {
 
-    private static String START_ACTION = "NotifyServiceStart";
-    private static String STOP_ACTION = "NotifyServiceStop";
+    private static String START_ACTION = "ServiceBroadcastReceiver";
+    private static String STOP_ACTION = "ServiceBroadcastReceiver";
 
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
-        MainActivity activity = new MainActivity();
-        if (START_ACTION.equalsIgnoreCase(action)) {
-            activity.runTest(activity.getTestUrl());
-        }
+        Log.i("TAGH5-BroadcastReceiver", action);
     }
 }

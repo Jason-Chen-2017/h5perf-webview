@@ -8,6 +8,12 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
+/**
+ * PC端服务程序，调用如下命令，触发手机上的Webview壳执行：
+ * adb shell am start --es url "https://jason-chen-2017.github.io/Jason-Chen-2017/" com.example.jack.myapplication2/com.example.jack.myapplication2.H5TestActivity
+ */
+
+
 public class H5TestActivity extends AppCompatActivity {
 
     final String domStr = "javascript:window.addEventListener('DOMContentLoaded', function(){prompt('domc:' + new Date().getTime());})";
@@ -105,15 +111,16 @@ public class H5TestActivity extends AppCompatActivity {
                                    }
         );
 
-        String testUrl = getIntent().getStringExtra("testUrl");
+//        String testUrl = getIntent().getStringExtra("testUrl");
+//        webView.loadUrl(testUrl);
+
+        String testUrl = getIntent().getStringExtra("url");
         webView.loadUrl(testUrl);
     }
 
 
     /**
      * tcpdump抓取请求数据包
-     *
-     *
      */
 
     private void tcpdump() {

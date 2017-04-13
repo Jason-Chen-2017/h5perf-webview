@@ -18,6 +18,8 @@
 
         <activity android:name=".H5TestActivity"></activity>
 
+        <receiver android:name=".ServiceBroadcastReceiver"></receiver>
+
     </application>
 
     <uses-permission android:name="android.permission.INTERNET"></uses-permission>
