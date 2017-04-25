@@ -7,8 +7,8 @@ import android.view.View;
 import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity {
-    Button testButton;
     public String testUrl = "https://www.baidu.com";
+    Button testButton;
 
     public String getTestUrl() {
         return testUrl;

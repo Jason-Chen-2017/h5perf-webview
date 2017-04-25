@@ -1,12 +1,18 @@
 package com.example.jack.myapplication2;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.webkit.JsPromptResult;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
+
+import com.alibaba.fastjson.JSON;
 
 /**
  * PC端服务程序，调用如下命令，触发手机上的Webview壳执行：
@@ -30,8 +36,6 @@ public class H5TestActivity extends AppCompatActivity {
     }
 
     public void doH5Test() {
-        tcpdump();
-
         webView = (WebView) findViewById(R.id.h5WebView);
         //启用支持javascript
         WebSettings settings = webView.getSettings();
@@ -40,6 +44,55 @@ public class H5TestActivity extends AppCompatActivity {
 
         final long startTime = System.currentTimeMillis();
         Log.i("TAGH5-StartTime:", startTime + "");
+
+        webView.setWebViewClient(new WebViewClient() {
+
+            int countOnLoadResource = 0;
+            int countInterceptRequest = 0;
+
+            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                Log.i("TAGH5", "onPageStarted 时间: " + (System.currentTimeMillis() - startTime) + "");
+                Log.i("TAGH5", "onPageStarted url: " + url);
+            }
+
+
+            public void onPageFinished(WebView view, String url) {
+                Log.i("TAGH5", "onPageFinished 时间: " + (System.currentTimeMillis() - startTime) + "");
+                Log.i("TAGH5", "onPageFinished url: " + url);
+            }
+
+            /**
+             * 页面加载完成可见
+             * @param view
+             * @param url
+             */
+            public void onPageCommitVisible(WebView view, String url) {
+                Log.i("TAGH5", "onPageCommitVisible 时间: " + (System.currentTimeMillis() - startTime) + "");
+                Log.i("TAGH5", "onPageCommitVisible url: " + url);
+            }
+
+            public void onLoadResource(WebView view, String url) {
+                Log.i("TAGH5", "第" + (++countOnLoadResource) + "个onLoadResource 时间: " + (System.currentTimeMillis() - startTime) + "");
+                Log.i("TAGH5", "onLoadResource url: " + url);
+//                Log.i("TAGH5", "onLoadResource getResources: " + JSON.toJSONString(view.getResources()));
+
+            }
+
+            public WebResourceResponse shouldInterceptRequest(WebView view,
+                                                              WebResourceRequest request) {
+                Log.i("TAGH5", "第" + (++countInterceptRequest) + "个shouldInterceptRequest Request时间: " + ((System.currentTimeMillis() - startTime)) + " " + JSON.toJSONString(request));
+                Log.i("TAGH5", "shouldInterceptRequest uri: " + JSON.toJSONString(request.getUrl()));
+                Log.i("TAGH5", "shouldInterceptRequest Method: " + request.getMethod());
+                Log.i("TAGH5", "shouldInterceptRequest RequestHeaders: " + JSON.toJSONString(request.getRequestHeaders()));
+
+                return null;
+            }
+
+            public void onReceivedLoginRequest(WebView view, String realm,
+                                               String account, String args) {
+            }
+        });
+
 
         webView.setWebChromeClient(new WebChromeClient() {
 
@@ -111,36 +164,9 @@ public class H5TestActivity extends AppCompatActivity {
                                    }
         );
 
-//        String testUrl = getIntent().getStringExtra("testUrl");
-//        webView.loadUrl(testUrl);
 
         String testUrl = getIntent().getStringExtra("url");
         webView.loadUrl(testUrl);
-    }
-
-
-    /**
-     * tcpdump抓取请求数据包
-     */
-
-    private void tcpdump() {
-
-        Thread tcpdump = new Thread() {
-            @Override
-            public void run() {
-                super.run();
-                String[] cmds = {
-                        "tcpdump -p -s 0 -w /sdcard/h5test.pcap"
-                };
-
-                Log.i("TAGH5", "执行Shell 。。。");
-                ShellUtil.CommandResult result = ShellUtil.execCommand(cmds, true, true);
-                Log.i("TAGH5", "CommandResult：" + result);
-            }
-        };
-
-        tcpdump.start();
-
     }
 
     /**
