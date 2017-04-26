@@ -14,9 +14,15 @@ import android.webkit.WebViewClient;
 
 import com.alibaba.fastjson.JSON;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 /**
  * PC端服务程序，调用如下命令，触发手机上的Webview壳执行：
  * adb shell am start --es url "https://jason-chen-2017.github.io/Jason-Chen-2017/" com.example.jack.myapplication2/com.example.jack.myapplication2.H5TestActivity
+ * <p>
+ * adb shell am start --es url "https://jason-chen-2017.github.io/Jason-Chen-2017/" --el tid 1 com.example.jack.myapplication2/com.example.jack.myapplication2.H5TestActivity
  */
 
 
@@ -24,7 +30,7 @@ public class H5TestActivity extends AppCompatActivity {
 
     final String domStr = "javascript:window.addEventListener('DOMContentLoaded', function(){prompt('domc:' + new Date().getTime());})";
     final String loadStr = "javascript:window.addEventListener('load', function(){prompt('load:' + new Date().getTime());})";
-
+    final List<HashMap<String, String>> requestResources = new ArrayList<>();
     WebView webView;
 
     @Override
@@ -32,23 +38,34 @@ public class H5TestActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_h5test);
 
-        doH5Test();
+        String testUrl = getIntent().getStringExtra("url");
+//        String tid = getIntent().getStringExtra("tid");
+        Long tid = getIntent().getLongExtra("tid", 1);
+        Log.i("TAGH5-testUrl", testUrl);
+        Log.i("TAGH5-tid", tid + "");
+
+        doH5Test(testUrl, tid);
     }
 
-    public void doH5Test() {
+
+    /**
+     * @param testUrl
+     * @param tid
+     */
+    public void doH5Test(final String testUrl, final Long tid) {
         webView = (WebView) findViewById(R.id.h5WebView);
         //启用支持javascript
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         webView.getSettings().setSupportZoom(true);
 
-        final long startTime = System.currentTimeMillis();
+        final Long startTime = System.currentTimeMillis();
         Log.i("TAGH5-StartTime:", startTime + "");
 
         webView.setWebViewClient(new WebViewClient() {
 
-            int countOnLoadResource = 0;
-            int countInterceptRequest = 0;
+            volatile Integer countOnLoadResource = 0;
+            volatile Integer countInterceptRequest = 0;
 
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 Log.i("TAGH5", "onPageStarted 时间: " + (System.currentTimeMillis() - startTime) + "");
@@ -59,6 +76,18 @@ public class H5TestActivity extends AppCompatActivity {
             public void onPageFinished(WebView view, String url) {
                 Log.i("TAGH5", "onPageFinished 时间: " + (System.currentTimeMillis() - startTime) + "");
                 Log.i("TAGH5", "onPageFinished url: " + url);
+
+                //“NetworkOnMainThreadException”出错提示的原因及解决办法
+                new Thread() {
+                    @Override
+                    public void run() {
+                        //把网络访问的代码放在这里
+                        RecordPerfDataTask recordPerfDataTask = new RecordPerfDataTask(requestResources);
+                        recordPerfDataTask.doInBackground(null);
+                    }
+                }.start();
+
+
             }
 
             /**
@@ -72,18 +101,38 @@ public class H5TestActivity extends AppCompatActivity {
             }
 
             public void onLoadResource(WebView view, String url) {
-                Log.i("TAGH5", "第" + (++countOnLoadResource) + "个onLoadResource 时间: " + (System.currentTimeMillis() - startTime) + "");
-                Log.i("TAGH5", "onLoadResource url: " + url);
+//                Log.i("TAGH5", "第" + (++countOnLoadResource) + "个onLoadResource 时间: " + (System.currentTimeMillis() - startTime) + "");
+//                Log.i("TAGH5", "onLoadResource url: " + url);
 //                Log.i("TAGH5", "onLoadResource getResources: " + JSON.toJSONString(view.getResources()));
 
             }
 
-            public WebResourceResponse shouldInterceptRequest(WebView view,
-                                                              WebResourceRequest request) {
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 Log.i("TAGH5", "第" + (++countInterceptRequest) + "个shouldInterceptRequest Request时间: " + ((System.currentTimeMillis() - startTime)) + " " + JSON.toJSONString(request));
-                Log.i("TAGH5", "shouldInterceptRequest uri: " + JSON.toJSONString(request.getUrl()));
-                Log.i("TAGH5", "shouldInterceptRequest Method: " + request.getMethod());
-                Log.i("TAGH5", "shouldInterceptRequest RequestHeaders: " + JSON.toJSONString(request.getRequestHeaders()));
+//                Log.i("TAGH5", "shouldInterceptRequest uri: " + JSON.toJSONString(request.getUrl()));
+//                Log.i("TAGH5", "shouldInterceptRequest Method: " + request.getMethod());
+//                Log.i("TAGH5", "shouldInterceptRequest RequestHeaders: " + JSON.toJSONString(request.getRequestHeaders()));
+
+                String requestUrl = request.getUrl().getScheme() + ":" + request.getUrl().getSchemeSpecificPart();
+                String method = request.getMethod();
+                Long timestamp = System.currentTimeMillis();
+                Integer timeCost = Integer.valueOf(timestamp - startTime + "");
+                String headers = JSON.toJSONString(request.getRequestHeaders());
+
+                HashMap<String, String> map = new HashMap<>();
+                map.put("tid", tid == null ? "" : tid + "");
+                map.put("index", countInterceptRequest == null ? "" : countInterceptRequest + "");
+                map.put("testUrl", testUrl);
+                map.put("startTime", startTime == null ? "" : startTime + "");
+                map.put("timestamp", timestamp == null ? "" : timestamp + "");
+                map.put("timeCost", timeCost == null ? "" : timeCost + "");
+                map.put("requestUrl", requestUrl);
+                map.put("method", method);
+                map.put("headers", headers);
+
+                Log.i("TAGH5-addMap", JSON.toJSONString(map));
+                requestResources.add(map);
+
 
                 return null;
             }
@@ -158,23 +207,20 @@ public class H5TestActivity extends AppCompatActivity {
 
                                        @Override
                                        public void onProgressChanged(WebView view, int progress) {
+                                           if (progress == 100) {
+                                               Log.i("TAGH5", "onProgressChanged:" + progress);
+                                           }
+                                           super.onProgressChanged(view, progress);
                                        }
-
-
                                    }
         );
 
 
-        String testUrl = getIntent().getStringExtra("url");
         webView.loadUrl(testUrl);
-    }
-
-    /**
-     * 记录性能数据，写入web的数据库中
-     */
-
-    private void recordPerfDate(String url, PerfData data) {
 
     }
+
 
 }
+
+

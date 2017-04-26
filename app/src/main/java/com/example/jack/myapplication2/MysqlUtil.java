@@ -19,8 +19,10 @@ public class MysqlUtil {
             Class.forName(DRIVER_NAME);
             conn = DriverManager.getConnection(url, user, password);
         } catch (ClassNotFoundException e) {
+            e.printStackTrace();
             conn = null;
         } catch (SQLException e) {
+            e.printStackTrace();
             conn = null;
         }
 
@@ -79,9 +81,10 @@ public class MysqlUtil {
         try {
             statement = conn.createStatement();
             if (statement != null) {
-                execResult = statement.execute(sql);
+                execResult = statement.execute(sql, Statement.RETURN_GENERATED_KEYS);
             }
         } catch (SQLException e) {
+            e.printStackTrace();
             execResult = false;
         }
 
