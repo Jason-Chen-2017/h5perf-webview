@@ -14,9 +14,8 @@ import android.webkit.WebViewClient;
 
 import com.alibaba.fastjson.JSON;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * PC端服务程序，调用如下命令，触发手机上的Webview壳执行：
@@ -31,7 +30,7 @@ public class H5TestActivity extends AppCompatActivity {
     final String domStr = "javascript:window.addEventListener('DOMContentLoaded', function(){prompt('domc:' + new Date().getTime());})";
     final String loadStr = "javascript:window.addEventListener('load', function(){prompt('load:' + new Date().getTime());})";
     final String domTotalStr = "javascript:window.addEventListener('load', function(){prompt('domTotal:'+document.getElementsByTagName('*').length);})";
-    final List<HashMap<String, String>> requestResources = new ArrayList<>();
+    final CopyOnWriteArrayList<HashMap<String, String>> requestResources = new CopyOnWriteArrayList<>();
     final HashMap<String, String> timeData = new HashMap<>();
     WebView webView;
 
@@ -92,7 +91,7 @@ public class H5TestActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         //把网络访问的代码放在这里
-                        RecordPerfDataTask recordPerfDataTask = new RecordPerfDataTask(requestResources,timeData);
+                        RecordPerfDataTask recordPerfDataTask = new RecordPerfDataTask(requestResources, timeData);
                         recordPerfDataTask.doInBackground(null);
                     }
                 }.start();
