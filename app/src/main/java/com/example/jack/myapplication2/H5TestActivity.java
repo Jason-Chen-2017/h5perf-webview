@@ -30,7 +30,9 @@ public class H5TestActivity extends AppCompatActivity {
 
     final String domStr = "javascript:window.addEventListener('DOMContentLoaded', function(){prompt('domc:' + new Date().getTime());})";
     final String loadStr = "javascript:window.addEventListener('load', function(){prompt('load:' + new Date().getTime());})";
+    final String domTotalStr = "javascript:window.addEventListener('load', function(){prompt('domTotal:'+document.getElementsByTagName('*').length);})";
     final List<HashMap<String, String>> requestResources = new ArrayList<>();
+    final HashMap<String, String> timeData = new HashMap<>();
     WebView webView;
 
     @Override
@@ -43,6 +45,8 @@ public class H5TestActivity extends AppCompatActivity {
         Long tid = getIntent().getLongExtra("tid", 1);// 系统全局tid
         Log.i("TAGH5-testUrl", testUrl);
         Log.i("TAGH5-tid", tid + "");
+
+        timeData.put("tid", tid + "");
 
         doH5Test(testUrl, tid);
     }
@@ -77,12 +81,18 @@ public class H5TestActivity extends AppCompatActivity {
                 Log.i("TAGH5", "onPageFinished 时间: " + (System.currentTimeMillis() - startTime) + "");
                 Log.i("TAGH5", "onPageFinished url: " + url);
 
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
                 //“NetworkOnMainThreadException”出错提示的原因及解决办法
                 new Thread() {
                     @Override
                     public void run() {
                         //把网络访问的代码放在这里
-                        RecordPerfDataTask recordPerfDataTask = new RecordPerfDataTask(requestResources);
+                        RecordPerfDataTask recordPerfDataTask = new RecordPerfDataTask(requestResources,timeData);
                         recordPerfDataTask.doInBackground(null);
                     }
                 }.start();
@@ -90,21 +100,10 @@ public class H5TestActivity extends AppCompatActivity {
 
             }
 
-            /**
-             * 页面加载完成可见
-             * @param view
-             * @param url
-             */
-            public void onPageCommitVisible(WebView view, String url) {
-                Log.i("TAGH5", "onPageCommitVisible 时间: " + (System.currentTimeMillis() - startTime) + "");
-                Log.i("TAGH5", "onPageCommitVisible url: " + url);
-            }
-
             public void onLoadResource(WebView view, String url) {
 //                Log.i("TAGH5", "第" + (++countOnLoadResource) + "个onLoadResource 时间: " + (System.currentTimeMillis() - startTime) + "");
 //                Log.i("TAGH5", "onLoadResource url: " + url);
 //                Log.i("TAGH5", "onLoadResource getResources: " + JSON.toJSONString(view.getResources()));
-
             }
 
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
@@ -137,8 +136,7 @@ public class H5TestActivity extends AppCompatActivity {
                 return null;
             }
 
-            public void onReceivedLoginRequest(WebView view, String realm,
-                                               String account, String args) {
+            public void onReceivedLoginRequest(WebView view, String realm, String account, String args) {
             }
         });
 
@@ -161,16 +159,24 @@ public class H5TestActivity extends AppCompatActivity {
                                             * 所以经常在低网速的环境中，观察到页面由上至下缓慢显示完，或者先显示文本内容后再重绘成带有格式的页面内容。
                                             * 在android中我们通过使用webview.WebChromeClient的onReceivedTitle事件来近似获得白屏时间。
                                             */
-                                           long whiteScreenTime = System.currentTimeMillis();
-                                           Log.i("TAGH5-whiteScreenTime", whiteScreenTime - startTime + "");
+                                           long onReceivedTitle = System.currentTimeMillis() - startTime;
+                                           Log.i("TAGH5-onReceivedTitle", onReceivedTitle + "");
+                                           timeData.put("onReceivedTitle", onReceivedTitle + "");
 
                                            //插入js
                                            view.loadUrl(domStr);
                                            view.loadUrl(loadStr);
+                                           view.loadUrl(domTotalStr);
                                        }
 
                                        /**
                                         * prompt消息被Java层的WebChromeClient.onJsPrompt拦截到
+                                        *
+                                        * @RequestParam(value = "tid") String tid,
+                                        * @RequestParam(value = "onReceivedTitle") String onReceivedTitle,
+                                        * @RequestParam(value = "domTotal") String domTotal,
+                                        * @RequestParam(value = "domContentLoad") String domContentLoad,
+                                        * @RequestParam(value = "load") String load
                                         *
                                         * @param view
                                         * @param url
@@ -190,15 +196,25 @@ public class H5TestActivity extends AppCompatActivity {
                                            int domcIndex = message.indexOf("domc:");
                                            if (domcIndex > -1) {
                                                String domc = message.substring(domcIndex + 5);
-                                               long domcTime = Long.parseLong(domc);
-                                               Log.i("TAGH5-DOMContentLoad", domcTime - startTime + "");
+                                               long domContentLoad = Long.parseLong(domc) - startTime;
+                                               Log.i("TAGH5-domContentLoad", domContentLoad + "");
+                                               timeData.put("domContentLoad", domContentLoad + "");
+
                                            }
 
                                            int loadIndex = message.indexOf("load:");
                                            if (loadIndex > -1) {
-                                               String load = message.substring(loadIndex + 5);
-                                               long loadTime = Long.parseLong(load);
-                                               Log.i("TAGH5-load", loadTime - startTime + "");
+                                               String loadStr = message.substring(loadIndex + 5);
+                                               long load = Long.parseLong(loadStr) - startTime;
+                                               Log.i("TAGH5-load", load + "");
+                                               timeData.put("load", load + "");
+                                           }
+
+                                           int domTotalIndex = message.indexOf("domTotal:");
+                                           if (domTotalIndex > -1) {
+                                               String domTotal = message.substring(domTotalIndex + 9);
+                                               Log.i("TAGH5-domTotal", domTotal);
+                                               timeData.put("domTotal", domTotal + "");
                                            }
 
                                            return true;
