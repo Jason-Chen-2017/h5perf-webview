@@ -8,6 +8,7 @@ import com.example.jack.myapplication2.okhttp.RequestManager;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by jack on 2017/4/26.
@@ -15,14 +16,14 @@ import java.util.List;
 
 public class RecordPerfDataTask extends AsyncTask {
 
-    List<HashMap<String, String>> requestResources;
+    CopyOnWriteArrayList<HashMap<String, String>> requestResources;
     HashMap<String, String> timeData;
 
-    public RecordPerfDataTask(List<HashMap<String, String>> requestResources) {
+    public RecordPerfDataTask(CopyOnWriteArrayList<HashMap<String, String>> requestResources) {
         this.requestResources = requestResources;
     }
 
-    public RecordPerfDataTask(List<HashMap<String, String>> requestResources, HashMap<String, String> timeData) {
+    public RecordPerfDataTask(CopyOnWriteArrayList<HashMap<String, String>> requestResources, HashMap<String, String> timeData) {
         this.requestResources = requestResources;
         this.timeData = timeData;
     }
@@ -47,7 +48,7 @@ public class RecordPerfDataTask extends AsyncTask {
      * @param requestResources
      */
 
-    private void recordPerfData(List<HashMap<String, String>> requestResources) {
+    private void recordPerfData(CopyOnWriteArrayList<HashMap<String, String>> requestResources) {
         Log.i("TAGH5", "requestResources=" + JSON.toJSONString(requestResources));
         for (HashMap<String, String> map : requestResources) {
             Log.i("TAGH5", "map=" + JSON.toJSONString(map));
