@@ -40,7 +40,7 @@ public class H5TestActivity extends AppCompatActivity {
 
         String testUrl = getIntent().getStringExtra("url");
 //        String tid = getIntent().getStringExtra("tid");
-        Long tid = getIntent().getLongExtra("tid", 1);
+        Long tid = getIntent().getLongExtra("tid", 1);// 系统全局tid
         Log.i("TAGH5-testUrl", testUrl);
         Log.i("TAGH5-tid", tid + "");
 
