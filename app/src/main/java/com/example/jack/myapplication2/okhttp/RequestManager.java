@@ -31,8 +31,8 @@ public class RequestManager {
     private static final MediaType MEDIA_TYPE_JSON = MediaType.parse("application/x-www-form-urlencoded; charset=utf-8");//mdiatype 这个需要和服务端保持一致
     private static final MediaType MEDIA_TYPE_MARKDOWN = MediaType.parse("text/x-markdown; charset=utf-8");//mdiatype 这个需要和服务端保持一致
     private static final String TAG = "TAGH5" + RequestManager.class.getSimpleName();
-//    private static final String BASE_URL = "http://30.6.59.108:8188";//请求接口根地址
-    private static final String BASE_URL = "http://192.168.1.104:8188";//请求接口根地址
+    private static final String BASE_URL = "http://30.6.59.108:8188";//请求接口根地址
+//    private static final String BASE_URL = "http://192.168.1.104:8188";//请求接口根地址
     private static volatile RequestManager mInstance;//单利引用
     private OkHttpClient mOkHttpClient = new OkHttpClient();//okHttpClient 实例
     private FrameReader.Handler okHttpHandler;//全局处理子线程和M主线程通信

@@ -79,24 +79,6 @@ public class H5TestActivity extends AppCompatActivity {
             public void onPageFinished(WebView view, String url) {
                 Log.i("TAGH5", "onPageFinished 时间: " + (System.currentTimeMillis() - startTime) + "");
                 Log.i("TAGH5", "onPageFinished url: " + url);
-
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                //“NetworkOnMainThreadException”出错提示的原因及解决办法
-                new Thread() {
-                    @Override
-                    public void run() {
-                        //把网络访问的代码放在这里
-                        RecordPerfDataTask recordPerfDataTask = new RecordPerfDataTask(requestResources, timeData);
-                        recordPerfDataTask.doInBackground(null);
-                    }
-                }.start();
-
-
             }
 
             public void onLoadResource(WebView view, String url) {
@@ -171,12 +153,6 @@ public class H5TestActivity extends AppCompatActivity {
                                        /**
                                         * prompt消息被Java层的WebChromeClient.onJsPrompt拦截到
                                         *
-                                        * @RequestParam(value = "tid") String tid,
-                                        * @RequestParam(value = "onReceivedTitle") String onReceivedTitle,
-                                        * @RequestParam(value = "domTotal") String domTotal,
-                                        * @RequestParam(value = "domContentLoad") String domContentLoad,
-                                        * @RequestParam(value = "load") String load
-                                        *
                                         * @param view
                                         * @param url
                                         * @param message
@@ -232,6 +208,13 @@ public class H5TestActivity extends AppCompatActivity {
 
 
         webView.loadUrl(testUrl);
+
+        int progress = webView.getProgress();
+        Log.i("TAGH5", "webView Progress: " + progress);
+
+        //“NetworkOnMainThreadException”出错提示的原因及解决办法:把网络访问的代码放在另外一个线程
+        RecordPerfDataTask recordPerfDataTask = new RecordPerfDataTask(requestResources, timeData, String.valueOf(tid));
+        recordPerfDataTask.execute();
 
     }
 
