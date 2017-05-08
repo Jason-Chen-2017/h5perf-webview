@@ -213,8 +213,8 @@ public class H5TestActivity extends AppCompatActivity {
         Log.i("TAGH5", "webView Progress: " + progress);
 
         //“NetworkOnMainThreadException”出错提示的原因及解决办法:把网络访问的代码放在另外一个线程
-        RecordPerfDataTask recordPerfDataTask = new RecordPerfDataTask(requestResources, timeData, String.valueOf(tid));
-        recordPerfDataTask.execute();
+//        RecordPerfDataTask recordPerfDataTask = new RecordPerfDataTask(requestResources, timeData, String.valueOf(tid));
+//        recordPerfDataTask.execute();
 
     }
 
