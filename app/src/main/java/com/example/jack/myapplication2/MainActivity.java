@@ -1,18 +1,24 @@
 package com.example.jack.myapplication2;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
     public String testUrl = "https://www.baidu.com";
     Button testButton;
-    Button startDingButton;
+    Button startDingWebViewButton;
+    Button startDingAppButton;
 
     public String getTestUrl() {
         return testUrl;
@@ -30,10 +36,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        final PackageManager pm = this.getPackageManager();
+        final PackageManager packageManager = this.getPackageManager();
 
-        startDingButton = (Button) findViewById(R.id.start_ding_button);
-        startDingButton.setOnClickListener(new View.OnClickListener() {
+        startDingWebViewButton = (Button) findViewById(R.id.start_ding_webview_button);
+        startDingWebViewButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 //                Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -50,7 +56,41 @@ public class MainActivity extends AppCompatActivity {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
                 Context context = getApplicationContext();
-                if (null != intent.resolveActivity(pm)) {
+                if (null != intent.resolveActivity(packageManager)) {
+                    context.startActivity(intent);
+                }
+
+            }
+        });
+
+        startDingAppButton = (Button) findViewById(R.id.start_ding_app_button);
+        startDingAppButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PackageInfo pi = null;
+                try {
+                    pi = packageManager.getPackageInfo("com.alibaba.android.rimet", 0);
+                } catch (PackageManager.NameNotFoundException e) {
+
+                }
+                Intent resolveIntent = new Intent(Intent.ACTION_MAIN, null);
+                resolveIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+                resolveIntent.setPackage(pi.packageName);
+
+                List<ResolveInfo> apps = packageManager.queryIntentActivities(resolveIntent, 0);
+
+                ResolveInfo ri = apps.iterator().next();
+                if (ri != null ) {
+                    String className = ri.activityInfo.name;
+
+                    Intent intent = new Intent(Intent.ACTION_MAIN);
+                    intent.addCategory(Intent.CATEGORY_LAUNCHER);
+
+                    ComponentName cn = new ComponentName("com.alibaba.android.rimet", className);
+                    intent.setComponent(cn);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+                    Context context = getApplicationContext();
                     context.startActivity(intent);
                 }
 
